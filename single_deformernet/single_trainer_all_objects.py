@@ -124,7 +124,8 @@ if __name__ == "__main__":
     use_mp_input = True  # False
 
     # weight_path = f"/home/baothach/shape_servo_data/rotation_extension/single_physical_dvrk/all_objects/weights/run1_w_rot_no_MP"
-    weight_path = f"/home/baothach/shape_servo_data/rotation_extension/single_physical_dvrk/all_objects/weights/run1_w_rot_w_MP"
+    #weight_path = f"/home/baothach/shape_servo_data/rotation_extension/single_physical_dvrk/all_objects/weights/run1_w_rot_w_MP"
+    weight_path = f"/home/baothach/Documents/shinghei_data/single_deformernet_weights"
     os.makedirs(weight_path, exist_ok=True)
 
     logger = logging.getLogger(weight_path)
@@ -142,15 +143,17 @@ if __name__ == "__main__":
     device = torch.device("cuda")
 
     prim_names = ["box"]  # ["box", "cylinder", "hemis"]
-    stiffnesses = ["1k", "5k", "10k"]  # ["1k", "5k", "10k"]
+    stiffnesses = ["1k"]  # ["1k", "5k", "10k"]
     object_names = [
         f"{prim_name}_{stiffness}Pa"
         for (prim_name, stiffness) in list(product(prim_names, stiffnesses))
     ]
 
-    dataset_path = (
-        f"/home/baothach/shape_servo_data/rotation_extension/single_physical_dvrk"
-    )
+    # dataset_path = (
+    #     f"/home/baothach/shape_servo_data/rotation_extension/single_physical_dvrk"
+    # )
+
+    dataset_path = f"/home/baothach/Documents/shinghei_data/def"
     dataset = SingleDeformernetAllObjectsDataset(
         dataset_path, object_names, use_mp_input
     )

@@ -26,8 +26,8 @@ args = parser.parse_args()
 
 # data_recording_path = f"/home/baothach/shape_servo_data/rotation_extension/single_physical_dvrk/multi_{args.obj_category}/data"
 # data_processed_path = f"/home/baothach/shape_servo_data/rotation_extension/single_physical_dvrk/multi_{args.obj_category}/processed_data"
-data_recording_path = f"/home/baothach/Documents/shinghei_def_data"
-data_processed_path = f"/home/baothach/Documents/processed_shinghei_def_data"
+data_recording_path = f"/home/baothach/Documents/shinghei_data/def/multi_{args.obj_category}/data"
+data_processed_path = f"/home/baothach/Documents/shinghei_data/def/multi_{args.obj_category}/processed_data"
 os.makedirs(data_processed_path, exist_ok=True)
 start_time = timeit.default_timer()
 
