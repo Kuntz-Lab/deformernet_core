@@ -9,12 +9,13 @@ import sys
 
 sys.path.append("../")
 from sklearn.neighbors import NearestNeighbors
-from utils.point_cloud_utils import down_sampling, pcd_ize
+from utils.point_cloud_utils import down_sampling, pcd_ize, to_obj_frame_wrapper
 from utils.miscellaneous_utils import write_pickle_data, read_pickle_data
 
 
 ROBOT_Z_OFFSET = 0.25
 two_robot_offset = 1.0
+use_obj_frame = True ### default is False
 
 parser = argparse.ArgumentParser(description=None)
 parser.add_argument(
@@ -23,8 +24,10 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-data_recording_path = f"/home/baothach/shape_servo_data/rotation_extension/single_physical_dvrk/multi_{args.obj_category}/data"
-data_processed_path = f"/home/baothach/shape_servo_data/rotation_extension/single_physical_dvrk/multi_{args.obj_category}/processed_data"
+# data_recording_path = f"/home/baothach/shape_servo_data/rotation_extension/single_physical_dvrk/multi_{args.obj_category}/data"
+# data_processed_path = f"/home/baothach/shape_servo_data/rotation_extension/single_physical_dvrk/multi_{args.obj_category}/processed_data"
+data_recording_path = f"/home/baothach/Documents/shinghei_def_data"
+data_processed_path = f"/home/baothach/Documents/processed_shinghei_def_data"
 os.makedirs(data_processed_path, exist_ok=True)
 start_time = timeit.default_timer()
 
@@ -49,9 +52,26 @@ with torch.no_grad():
         with open(file_name, "rb") as handle:
             data = pickle.load(handle)
 
-        pc = down_sampling(data["partial pcs"][0]).transpose(1, 0)
-        pc_goal = down_sampling(data["partial pcs"][1]).transpose(1, 0)
-        mp_pos_1 = data["mani_point"]
+        if use_obj_frame:
+            ############## Using object frame #################
+            pc = data["partial pcs"][0]
+            pc_goal = data["partial pcs"][1]
+            mp_pos_1 = data["mani_point"]
+            # convert point clouds to object frame
+            pc, pc_goal, world2obj_mat = to_obj_frame_wrapper(p1=pc, p2=pc_goal, mode="obb")
+            # downsample
+            pc = down_sampling(pc).transpose(1, 0)
+            pc_goal = down_sampling(pc_goal).transpose(1, 0)
+            # convert mp_pos_1 to object frame
+            temp = np.array([mp_pos_1[0], mp_pos_1[1], mp_pos_1[2], 1])
+            mp_pos_1 = np.matmul(world2obj_mat, temp.reshape(-1,1))[:3,0]
+            ######################################################
+        else:
+            ############## Not using object frame ################
+            pc = down_sampling(data["partial pcs"][0]).transpose(1, 0)
+            pc_goal = down_sampling(data["partial pcs"][1]).transpose(1, 0)
+            mp_pos_1 = data["mani_point"]
+            ######################################################
 
         neigh = NearestNeighbors(n_neighbors=50)
         neigh.fit(pc.transpose(1, 0))

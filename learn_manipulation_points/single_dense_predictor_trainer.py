@@ -108,7 +108,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     args.batch_size = 100  # 150
 
-    weight_path = f"/home/baothach/shape_servo_data/manipulation_points/single_physical_dvrk/all_objects/weights/all_boxes"
+    # weight_path = f"/home/baothach/shape_servo_data/manipulation_points/single_physical_dvrk/all_objects/weights/all_boxes"
+    weight_path = f"/home/baothach/Documents/single_dense_predictor_weights"
     os.makedirs(weight_path, exist_ok=True)
 
     logger = logging.getLogger(weight_path)
@@ -124,9 +125,10 @@ if __name__ == "__main__":
     torch.manual_seed(2021)
     device = torch.device("cuda")
 
-    dataset_path = (
-        "/home/baothach/shape_servo_data/manipulation_points/single_physical_dvrk"
-    )
+    # dataset_path = (
+    #     "/home/baothach/shape_servo_data/manipulation_points/single_physical_dvrk"
+    # )
+    dataset_path = f"/home/baothach/Documents/processed_shinghei_mani_data"
     prim_names = ["box"]  # ["box", "cylinder", "hemis"]
     stiffnesses = ["1k", "5k", "10k"]  # ["1k", "5k", "10k"]
     object_names = [

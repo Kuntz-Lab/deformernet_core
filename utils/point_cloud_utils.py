@@ -319,3 +319,29 @@ def random_transformation_matrix(translation_range=None, rotation_range=None):
     transformation_matrix[:3, 3] = translation
 
     return transformation_matrix
+
+def to_obj_frame_wrapper(p1, p2, mode="obb"):
+    '''
+    modes:
+    - obb: get the obj frame defined by an oriented bounding box of p1 and transform both point clouds to that frame
+    - shift_only: apply a constant shift to the point cloud. 
+    '''
+
+    if mode=="obb":
+        obj_homo_mat = world_to_object_frame(p1)
+        p1 = transform_point_cloud(p1, obj_homo_mat)
+        p2 = transform_point_cloud(p2, obj_homo_mat)
+    elif mode=="shift_only":
+        shift = np.array([0, -(-0.5), 0.002])
+        obj_homo_mat = np.array([
+            [1,0,0,shift[0]],
+            [0,1,0,shift[1]],
+            [0,0,1,shift[2]],
+            [0,0,0,1]
+        ])
+        p1 = transform_point_cloud(p1, obj_homo_mat)
+        p2 = transform_point_cloud(p2, obj_homo_mat)
+    else:
+        raise Exception("not a valid obj frame transformation mode ... ")
+
+    return p1, p2, obj_homo_mat
