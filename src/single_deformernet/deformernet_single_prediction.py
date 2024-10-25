@@ -7,66 +7,20 @@ Date: October 2024
 """
 import pickle5 as pickle
 import numpy as np
+import open3d # must be imported before torch to avoid conflict
 import torch
 import transformations
-from sklearn.neighbors import NearestNeighbors
 from typing import List, Tuple, Dict, Optional
+import os
+import sys
 
 from single_architecture import DeformerNetSingle as DeformerNet
-# from utils import visualize_pointclouds
 
-def tensorize_pointcloud(
-    pointcloud: np.ndarray,
-    manipulation_points: Optional[List[np.ndarray]] = None,
-    ) -> torch.Tensor:
-    """
-    Convert a numpy pointcloud to a PyTorch tensor. Optionally, add channels for manipulation points.
-
-    Parameters:
-        pointcloud (np.ndarray): The pointcloud.
-        manipulation_points (List[np.ndarray]): The manipulation points.
-
-    Returns:
-        pointcloud (torch.Tensor): The pointcloud tensor.
-    """
-    
-    assert pointcloud.shape[1] == 3, "Input point cloud should have shape (num_pts, 3)"
-
-    if manipulation_points is not None:     
-        mp_channels = get_manipulation_point_channels(pointcloud, manipulation_points) 
-        modified_pointcloud = np.vstack([pointcloud.transpose(1,0)] + mp_channels)
-        pointcloud = torch.from_numpy(modified_pointcloud).float()        
-    else:
-        pointcloud = torch.from_numpy(pointcloud).permute(1,0).float()   
-            
-    return pointcloud 
-
-def get_manipulation_point_channels(pointcloud: np.ndarray, manipulation_points: np.ndarray) -> List[np.ndarray]:
-    """"
-    Modifies pointcloud to include a channel for each manipulation point. The channel is 1 near the manipulation point and 0 elsewhere.
-
-    Parameters:
-        pointcloud (np.ndarray): The pointcloud.
-        manipulation_points (np.ndarray): The manipulation points.
-
-    Returns:
-        modified_pc (np.ndarray): The modified pointcloud with the manipulation point channel(s).
-    """
-    
-    assert type(manipulation_points) == list, "manipulation_points should be a list of numpy arrays"          
-    neigh = NearestNeighbors(n_neighbors=50)
-    neigh.fit(pointcloud)
-    
-    mp_channels = []
-    for mani_point in manipulation_points:
-        _, nearest_idxs = neigh.kneighbors(mani_point.reshape(1, -1))
-        mp_channel = np.zeros(pointcloud.shape[0])
-        mp_channel[nearest_idxs.flatten()] = 1
-        mp_channels.append(mp_channel)
-        
-    modified_pc = np.vstack([pointcloud.transpose(1,0)] + mp_channels)
-
-    return modified_pc
+# add the src directory to the path
+src_path = os.path.join(os.path.dirname(__file__), '..')
+print(f"Adding {src_path} to sys.path")
+sys.path.append(src_path)
+from utils.point_cloud_utils import tensorize_pointcloud
 
 def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: np.ndarray, manipulation_point: np.ndarray, visualize: bool = False) -> np.ndarray:
     """
