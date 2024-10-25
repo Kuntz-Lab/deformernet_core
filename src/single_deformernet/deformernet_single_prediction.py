@@ -20,7 +20,7 @@ from single_architecture import DeformerNetSingle as DeformerNet
 src_path = os.path.join(os.path.dirname(__file__), '..')
 print(f"Adding {src_path} to sys.path")
 sys.path.append(src_path)
-from utils.point_cloud_utils import tensorize_pointcloud
+from utils.point_cloud_utils import tensorize_pointcloud, pick_point
 
 def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: np.ndarray, manipulation_point: np.ndarray, visualize: bool = False) -> np.ndarray:
     """
@@ -51,6 +51,12 @@ def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: 
     model.load_state_dict(torch.load(weight_path))  
     model.to(device) # TODO: make this a parameter?
     model.eval()
+
+    # Filter XYZ limits
+    # TODO:
+
+    # Down sample to 1024 points
+    # TODO:
 
     with torch.no_grad():
 
@@ -95,5 +101,7 @@ if __name__ == '__main__':
 
     with open(goal_pointcloud_path, 'rb') as handle:
         goal_pointcloud = pickle.load(handle)
+    
+    manipulation_point = pick_point(initial_pointcloud)
 
     action = run_deformernet_prediction()
