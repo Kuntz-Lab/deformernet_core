@@ -6,6 +6,163 @@ from sklearn.neighbors import NearestNeighbors
 from typing import List, Optional
 import torch
 
+def visualize_pointclouds(pc1_array: np.array, pc2_array: np.array = None, only_pointclouds: bool = False, manipulation_point: np.array = None, manipulation_point_2: np.array = None, other_points: list = [], action_translation: np.array = None, action_translation_2: np.array = None, action_rotation: np.array = None, action_rotation_2: np.array = None, plot_origin: bool = True):
+    """
+    Visualize point clouds for DeformerNet
+
+    Parameters:
+    - pc1_array (np.array): a point cloud array, usually the goal point cloud
+    - pc2_array (np.array): a point cloud array, usually the initial point cloud
+    - only_pointclouds (bool): if True, only visualize the point clouds
+    - manipulation_point (np.array): a point in 3D space that represents the manipulation point
+    - other_points (list[np.array]): a list of other points to visualize
+    - action_translation (np.array): a vector representing the action, will be visualized as a line
+    - action_rotation (np.array): a vector representing the rotation as XYZ Euler angles, will be visualized as a rotated axis
+    - plot_origin (bool): whether to plot the origin
+
+    Opens a open3D visualization window and blocks execution until window is closed
+    """
+    items = []
+
+    pc1 = pcd_ize(pc1_array, color=[0, 0, 0])
+    items.append(pc1)
+    
+    if pc2_array is not None:
+        pc2 = pcd_ize(pc2_array, color = [1, 0, 0])
+        items.append(pc2)
+
+    if only_pointclouds:
+        open3d.visualization.draw_geometries(items)
+        return
+
+
+    if manipulation_point_2 is not None:
+        print("Visualizing bimanual manipulation")
+        assert manipulation_point is not None, "manipulation_point must be provided if manipulation_point_2 is provided"
+    
+    if action_translation_2 is not None:
+        assert action_translation is not None, "action_translation must be provided if action_translation_2 is provided"
+    
+    if action_rotation_2 is not None:
+        assert action_rotation is not None, "action_rotation must be provided if action_rotation_2 is provided"
+
+
+    if manipulation_point is None:
+        print("pick a manipulation point for visualization")
+        manipulation_point = pick_point(pc1_array)
+
+    if action_translation_2 is not None and manipulation_point_2 is None:
+        print("pick a second manipulation point for visualization (object right)")
+        manipulation_point_2 = pick_point(pc1_array)
+
+    sphere = open3d.geometry.TriangleMesh.create_sphere(radius=0.01)
+    sphere.paint_uniform_color([0, 0, 1])  
+    sphere.translate(tuple(manipulation_point))
+    items.append(sphere)
+
+    if manipulation_point_2 is not None:
+        sphere = open3d.geometry.TriangleMesh.create_sphere(radius=0.01)
+        sphere.paint_uniform_color([1, 0, 0])  
+        sphere.translate(tuple(manipulation_point_2))
+        items.append(sphere)
+    
+    if action_translation is not None:
+        sphere = open3d.geometry.TriangleMesh.create_sphere(radius=0.01)
+        sphere.paint_uniform_color([0, 1, 0])  
+        sphere.translate(tuple(manipulation_point + action_translation))
+        items.append(sphere)
+    
+        lines = open3d.geometry.LineSet() # Create a LineSet
+        lines.points = open3d.utility.Vector3dVector([manipulation_point, manipulation_point + action_translation]) # Add points to the LineSet
+        lines.lines = open3d.utility.Vector2iVector([[0, 1]]) # Define the line by specifying the indices of the points in the LineSet
+        lines.colors = open3d.utility.Vector3dVector([[1, 0, 0]])  # Red color
+        items.append(lines)
+    
+    if action_rotation is not None:
+        # first plot the un-rotated axis at the manipulation point
+        coor = open3d.geometry.TriangleMesh.create_coordinate_frame(size=0.05)
+        coor.translate(manipulation_point)
+
+        # then plot the rotated axis at the end of the action_translation vector
+        r = coor.get_rotation_matrix_from_xyz(action_rotation)
+        coor_rot = open3d.geometry.TriangleMesh.create_coordinate_frame(size=0.05)
+        coor_rot.rotate(r, center=(0, 0, 0)) # rotate first, then translate
+        coor_rot.translate(manipulation_point + action_translation)
+        items.append(coor)
+        items.append(coor_rot)
+    
+    if action_translation_2 is not None:
+        sphere = open3d.geometry.TriangleMesh.create_sphere(radius=0.01)
+        sphere.paint_uniform_color([0, 1, 0])  
+        sphere.translate(tuple(manipulation_point_2 + action_translation_2))
+        items.append(sphere)
+    
+        lines = open3d.geometry.LineSet() # Create a LineSet
+        lines.points = open3d.utility.Vector3dVector([manipulation_point_2, manipulation_point_2 + action_translation_2]) # Add points to the LineSet
+        lines.lines = open3d.utility.Vector2iVector([[0, 1]]) # Define the line by specifying the indices of the points in the LineSet
+        lines.colors = open3d.utility.Vector3dVector([[1, 0, 0]])  # Red color
+        items.append(lines)
+    
+    if action_rotation_2 is not None:
+        # first plot the un-rotated axis at the manipulation point
+        coor = open3d.geometry.TriangleMesh.create_coordinate_frame(size=0.05)
+        coor.translate(manipulation_point_2)
+
+        # then plot the rotated axis at the end of the action_translation vector
+        r = coor.get_rotation_matrix_from_xyz(action_rotation_2)
+        coor_rot = open3d.geometry.TriangleMesh.create_coordinate_frame(size=0.05)
+        coor_rot.rotate(r, center=(0, 0, 0)) # rotate first, then translate
+        coor_rot.translate(manipulation_point_2 + action_translation_2)
+        items.append(coor)
+        items.append(coor_rot)
+            
+
+    print(f"visualizing {len(other_points)} points")
+    initial_color = np.array([0, 1, 0])  # Initial color (green)
+    darkening_step = 0.1  # Amount to darken the color
+    for i, point in enumerate(other_points):
+        sphere = open3d.geometry.TriangleMesh.create_sphere(radius=0.01)
+        color = np.maximum(initial_color - i * darkening_step, 0)
+        sphere.paint_uniform_color(color)  
+        sphere.translate(tuple(point))
+        items.append(sphere)
+
+    if plot_origin:
+        coor = open3d.geometry.TriangleMesh.create_coordinate_frame(size=0.05) 
+        items.append(coor)
+    
+    open3d.visualization.draw_geometries(items) # remains blocked here until visualization window is closed
+
+
+def pick_point(pc_array: np.array, number_of_points=1):
+    """
+    Given a point cloud, allow the user to pick a point using the Open3D visualizer.
+
+    Parameters:
+    - pc_array (np.array): a point cloud array
+
+    Returns:
+    - (np.array): the picked point (x, y, z)
+
+    """
+    pc = pcd_ize(pc_array, color=[0, 0, 0])
+    print("Please pick a point using [shift + left click]")
+    vis = open3d.visualization.VisualizerWithEditing()
+    vis.create_window()
+
+    vis.add_geometry(pc)
+    vis.get_render_option().point_size = 6
+    vis.run()
+    vis.destroy_window()
+    picked_indices = vis.get_picked_points()
+
+    if picked_indices:
+        picked_points = pc_array[picked_indices[0]]
+        
+        return picked_points
+    else:
+        return None
+    
 
 def tensorize_pointcloud(
     pointcloud: np.ndarray,
