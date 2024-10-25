@@ -5,7 +5,7 @@ Kuntz Lab at the University of Utah
 Date: October 2024
 
 """
-
+import pickle5 as pickle
 import numpy as np
 import torch
 import transformations
@@ -13,7 +13,7 @@ from sklearn.neighbors import NearestNeighbors
 from typing import List, Tuple, Dict, Optional
 
 from single_architecture import DeformerNetSingle as DeformerNet
-from utils import visualize_pointclouds
+# from utils import visualize_pointclouds
 
 def tensorize_pointcloud(
     pointcloud: np.ndarray,
@@ -133,4 +133,13 @@ def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: 
     return action   # 6D for single-arm, 12D for bimanual (first 6 for left arm, last 6 for right arm)
 
 if __name__ == '__main__':
+    goal_pointcloud_path = "data/pointclouds/filtered_goal_singlearm_goal1.pickle"
+    initial_pointcloud_path = "data/pointclouds/filtered_goal_singlearm_initial1.pickle"
+    
+    with open(initial_pointcloud_path, 'rb') as handle:
+        initial_pointcloud = pickle.load(handle)
+
+    with open(goal_pointcloud_path, 'rb') as handle:
+        goal_pointcloud = pickle.load(handle)
+
     action = run_deformernet_prediction()
