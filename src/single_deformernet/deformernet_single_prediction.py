@@ -5,9 +5,8 @@ Kuntz Lab at the University of Utah
 Date: October 2024
 
 """
-import pickle5 as pickle
+import pickle
 import numpy as np
-import open3d # must be imported before torch to avoid conflict
 import torch
 import transformations
 from typing import List, Tuple, Dict, Optional
@@ -39,7 +38,7 @@ def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: 
     # Load network architecture and weights
     model = DeformerNet(normal_channel=False, use_mp_input=(manipulation_point is not None))      
 
-    weight_path = "./weights/deformernet_w_mp"   
+    weight_path = "./data/weights/deformernet_w_mp"   
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -64,7 +63,7 @@ def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: 
         goal_pointcloud_tensor = tensorize_pointcloud(goal_pointcloud).to(device)
 
         if (manipulation_point is not None):                                 
-            current_pointcloud_tensor = tensorize_pointcloud(current_pointcloud, mani_points=[manipulation_point]).to(device)
+            current_pointcloud_tensor = tensorize_pointcloud(current_pointcloud, manipulation_points=[manipulation_point]).to(device)
         else:
             current_pointcloud_tensor = tensorize_pointcloud(current_pointcloud).to(device)
 
@@ -104,4 +103,4 @@ if __name__ == '__main__':
     
     manipulation_point = pick_point(initial_pointcloud)
 
-    action = run_deformernet_prediction()
+    action = run_deformernet_prediction(initial_pointcloud, goal_pointcloud, manipulation_point, visualize=True)
