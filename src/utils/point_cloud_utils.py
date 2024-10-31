@@ -6,6 +6,7 @@ from sklearn.neighbors import NearestNeighbors
 from typing import List, Optional
 import torch
 
+
 def visualize_pointclouds(pc1_array: np.array, pc2_array: np.array = None, only_pointclouds: bool = False, manipulation_point: np.array = None, manipulation_point_2: np.array = None, other_points: list = [], action_translation: np.array = None, action_translation_2: np.array = None, action_rotation: np.array = None, action_rotation_2: np.array = None, plot_origin: bool = True):
     """
     Visualize point clouds for DeformerNet
@@ -134,7 +135,7 @@ def visualize_pointclouds(pc1_array: np.array, pc2_array: np.array = None, only_
     open3d.visualization.draw_geometries(items) # remains blocked here until visualization window is closed
 
 
-def pick_point(pc_array: np.array, number_of_points=1):
+def pick_point(pc_array: np.array):
     """
     Given a point cloud, allow the user to pick a point using the Open3D visualizer.
 
@@ -162,7 +163,7 @@ def pick_point(pc_array: np.array, number_of_points=1):
         return picked_points
     else:
         return None
-    
+
 
 def tensorize_pointcloud(
     pointcloud: np.ndarray,
@@ -172,23 +173,33 @@ def tensorize_pointcloud(
     Convert a numpy pointcloud to a PyTorch tensor. Optionally, add channels for manipulation points.
 
     Parameters:
-        pointcloud (np.ndarray): The pointcloud.
-        manipulation_points (List[np.ndarray]): The manipulation points.
+        pointcloud (np.ndarray): The pointcloud. Shape (number of points, 3)
+        manipulation_points (List[np.ndarray]): The manipulation points. Each manipulation point is a numpy array in the form [x, y, z].
 
     Returns:
         pointcloud (torch.Tensor): The pointcloud tensor.
     """
     
-    assert pointcloud.shape[1] == 3, "Input point cloud should have shape (num_pts, 3)"
-
+    assert pointcloud.shape[1] == 3, "Input point cloud should have shape (number of points, 3)"
     if manipulation_points is not None:     
-        mp_channels = get_manipulation_point_channels(pointcloud, manipulation_points) 
+        assert type(manipulation_points) == list, "manipulation_points should be a list of numpy arrays"          
+        neigh = NearestNeighbors(n_neighbors=50)
+        neigh.fit(pointcloud)
+        
+        mp_channels = []
+        for mani_point in manipulation_points:
+            _, nearest_idxs = neigh.kneighbors(mani_point.reshape(1, -1))
+            mp_channel = np.zeros(pointcloud.shape[0])
+            mp_channel[nearest_idxs.flatten()] = 1
+            mp_channels.append(mp_channel)
+            
         modified_pointcloud = np.vstack([pointcloud.transpose(1,0)] + mp_channels)
         pointcloud = torch.from_numpy(modified_pointcloud).float()        
+
     else:
         pointcloud = torch.from_numpy(pointcloud).permute(1,0).float()   
             
-    return pointcloud 
+    return pointcloud     
 
 
 def get_manipulation_point_channels(pointcloud: np.ndarray, manipulation_points: np.ndarray) -> List[np.ndarray]:

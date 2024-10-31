@@ -19,7 +19,7 @@ from single_architecture import DeformerNetSingle as DeformerNet
 src_path = os.path.join(os.path.dirname(__file__), '..')
 print(f"Adding {src_path} to sys.path")
 sys.path.append(src_path)
-from utils.point_cloud_utils import tensorize_pointcloud, pick_point
+from utils.point_cloud_utils import tensorize_pointcloud, pick_point, visualize_pointclouds
 
 def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: np.ndarray, manipulation_point: np.ndarray, visualize: bool = False) -> np.ndarray:
     """
@@ -84,9 +84,9 @@ def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: 
     
     action = np.concatenate((desired_translation_action, desired_eulers), axis=None)
 
-    # if visualize:
-    #     # Visualize the action
-    #     visualize_pointclouds(current_pointcloud, goal_pointcloud, only_pointclouds=False, manipulation_point = manipulation_point, other_points = self.previous_mani_points, action_translation=desired_translation_action, action_rotation=desired_eulers, xyz_limits=xyz_lims)
+    if visualize:
+        # Visualize the action
+        visualize_pointclouds(current_pointcloud, goal_pointcloud, only_pointclouds=False, manipulation_point = manipulation_point, action_translation=desired_translation_action, action_rotation=desired_eulers)
     
   
     return action   # 6D for single-arm, 12D for bimanual (first 6 for left arm, last 6 for right arm)
@@ -97,9 +97,11 @@ if __name__ == '__main__':
     
     with open(initial_pointcloud_path, 'rb') as handle:
         initial_pointcloud = pickle.load(handle)
+        initial_pointcloud = initial_pointcloud.squeeze()
 
     with open(goal_pointcloud_path, 'rb') as handle:
         goal_pointcloud = pickle.load(handle)
+        goal_pointcloud = goal_pointcloud.squeeze()
     
     manipulation_point = pick_point(initial_pointcloud)
 
