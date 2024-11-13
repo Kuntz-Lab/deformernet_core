@@ -16,11 +16,12 @@ class DeformerNetSingle(nn.Module):
         self.normal_channel = normal_channel
         self.use_mp_input = use_mp_input
 
+        # Set Abstraction layers
         if self.use_mp_input:
             self.sa1 = PointConvDensitySetAbstraction(
                 npoint=512,
                 nsample=32,
-                in_channel=4 + 3 + additional_channel,
+                in_channel=4 + 3 + additional_channel, # 4 = 3 (xyz) + 1 (manipulation point). There are two point clouds but only one with a manipulation point, so 4 + 3
                 mlp=[64],
                 bandwidth=0.1,
                 group_all=False,
@@ -29,7 +30,7 @@ class DeformerNetSingle(nn.Module):
             self.sa1 = PointConvDensitySetAbstraction(
                 npoint=512,
                 nsample=32,
-                in_channel=3 + 3 + additional_channel,
+                in_channel=3 + 3 + additional_channel, # 3 (xyz current) + 3 (xyz goal)
                 mlp=[64],
                 bandwidth=0.1,
                 group_all=False,
@@ -102,7 +103,7 @@ class DeformerNetSingle(nn.Module):
         # print(l1_points.shape)
         l2_xyz, l2_points = self.sa2(l1_xyz, l1_points)
         l3_xyz, l3_points = self.sa3(l2_xyz, l2_points)
-        x = l3_points.view(B, 256)
+        x = l3_points.view(B, 256) # reshape to (B, 256)
 
         if self.normal_channel:
             l0_points = xyz_goal
@@ -113,9 +114,9 @@ class DeformerNetSingle(nn.Module):
         l1_xyz, l1_points = self.sa1_g(l0_xyz, l0_points)
         l2_xyz, l2_points = self.sa2_g(l1_xyz, l1_points)
         l3_xyz, l3_points = self.sa3_g(l2_xyz, l2_points)
-        g = l3_points.view(B, 256)
+        g = l3_points.view(B, 256) # reshape to (B, 256)
 
-        x = torch.cat((x, g), dim=-1)
+        x = torch.cat((x, g), dim=-1) # x.shape = (B, 512)
 
         x = F.relu(self.bn1(self.fc1(x)))
         x = F.relu(self.bn3(self.fc3(x)))

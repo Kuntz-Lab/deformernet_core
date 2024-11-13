@@ -353,7 +353,8 @@ class PointConvDensitySetAbstraction(nn.Module):
         npoint (int): Number of points to sample.
         nsample (int): Number of neighbors to sample.
         in_channel (int): Number of input channels.
-        mlp (list): List of output channels for each MLP layer.
+        mlp (list): List of number of output channels for each "multi-layer perceptron" (MLP). Each MLP is a convolutional layer followed by a group normalization layer.
+                    The number of MLPs is equal to the length of this list. The use of "MLP" here is not the same as the traditional definition of an MLP.
         bandwidth (float): Bandwidth parameter for the kernel density estimation.
         group_all (bool): Flag indicating whether to use all points.
     """
