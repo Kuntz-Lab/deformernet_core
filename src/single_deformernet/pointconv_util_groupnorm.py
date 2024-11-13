@@ -66,6 +66,8 @@ def index_points(points, idx):
 
 def farthest_point_sample(xyz, npoint):
     """
+    Sample npoint points from a point cloud using farthest point sampling.
+
     Input:
         xyz: pointcloud data, [B, N, C]
         npoint: number of samples
@@ -344,6 +346,17 @@ class PointConvSetAbstraction(nn.Module):
 
 
 class PointConvDensitySetAbstraction(nn.Module):
+    """
+    PointConvDensitySetAbstraction module for point cloud feature learning.
+    
+    Parameters:
+        npoint (int): Number of points to sample.
+        nsample (int): Number of neighbors to sample.
+        in_channel (int): Number of input channels.
+        mlp (list): List of output channels for each MLP layer.
+        bandwidth (float): Bandwidth parameter for the kernel density estimation.
+        group_all (bool): Flag indicating whether to use all points.
+    """
     def __init__(self, npoint, nsample, in_channel, mlp, bandwidth, group_all):
         super(PointConvDensitySetAbstraction, self).__init__()
         self.npoint = npoint
