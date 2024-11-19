@@ -109,6 +109,7 @@ if __name__ == '__main__':
         goal_pointcloud = pickle.load(handle)
         goal_pointcloud = goal_pointcloud.squeeze()
     
-    manipulation_point = pick_point(initial_pointcloud)
+    # manipulation_point = pick_point(initial_pointcloud)
+    manipulation_point = np.array([0.0146, 0.0569, 0.0286])
 
     action = run_deformernet_prediction(initial_pointcloud, goal_pointcloud, manipulation_point, visualize=True)
