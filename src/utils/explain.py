@@ -2,18 +2,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 from torch import Tensor
 import open3d
-from point_cloud_utils import pcd_ize
+from utils.point_cloud_utils import pcd_ize
 
 def plot_points():
     print("hello")
 
-def visualize_pointclouds_simple_from_tensor(point_cloud: Tensor, plot_origin: bool = True):
+def visualize_pointclouds_simple_from_tensor(point_cloud: Tensor, point_cloud_features: Tensor, plot_origin: bool = True):
     """
     
     """
     items = []
 
     pc1_array = point_cloud[0].cpu().numpy()
+    pc1_array = np.swapaxes(pc1_array, 0, 1)
 
     pc1 = pcd_ize(pc1_array, color=[0, 0, 0])
     items.append(pc1)
