@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from torch import Tensor
 import open3d
+import os
 from utils.point_cloud_utils import pcd_ize
 
 def plot_points():
@@ -11,6 +12,9 @@ def visualize_pointclouds_simple_from_tensor(point_cloud: Tensor, point_cloud_fe
     """
     
     """
+    directory_path = "../../outputs"
+    os.makedirs(directory_path, exist_ok=True)
+
     items = []
     pc1_array = point_cloud[0].cpu().numpy()
     pc1_array = np.swapaxes(pc1_array, 0, 1)
@@ -37,6 +41,7 @@ def visualize_pointclouds_simple_from_tensor(point_cloud: Tensor, point_cloud_fe
             items.append(coor)
         
         open3d.visualization.draw_geometries(items) # remains blocked here until visualization window is closed
+        open3d.visualization.capture_screen_image(directory_path + f"/feature{feature_of_interest}.png", do_render=True) # save the image to the directory
 
 
 import numpy as np
