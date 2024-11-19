@@ -13,6 +13,10 @@ def visualize_pointclouds_simple_from_tensor(point_cloud: Tensor, point_cloud_fe
     """
     items = []
 
+    feature_of_interest = 0
+    point_cloud_features = point_cloud_features[0].cpu().numpy()
+    point_cloud_features = np.swapaxes(point_cloud_features, 0, 1)
+    
     pc1_array = point_cloud[0].cpu().numpy()
     pc1_array = np.swapaxes(pc1_array, 0, 1)
 
