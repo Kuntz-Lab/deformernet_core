@@ -13,7 +13,7 @@ def visualize_pointclouds_simple_from_tensor(point_cloud: Tensor, point_cloud_fe
     
     """
     directory_path = "../../outputs"
-    os.makedirs(directory_path, exist_ok=True)
+    # os.makedirs(directory_path, exist_ok=True)
 
     items = []
     pc1_array = point_cloud[0].cpu().numpy()
@@ -40,8 +40,19 @@ def visualize_pointclouds_simple_from_tensor(point_cloud: Tensor, point_cloud_fe
             coor = open3d.geometry.TriangleMesh.create_coordinate_frame(size=0.05) 
             items.append(coor)
         
-        open3d.visualization.draw_geometries(items) # remains blocked here until visualization window is closed
-        open3d.visualization.capture_screen_image(directory_path + f"/feature{feature_of_interest}.png", do_render=True) # save the image to the directory
+
+        vis = open3d.visualization.Visualizer()
+        vis.create_window(visible=True)
+        vis.add_geometry(pc1)
+        vis.update_geometry(pc1)
+        vis.poll_events()
+        vis.update_renderer()
+        vis.run()
+        vis.capture_screen_image(directory_path + f"/feature{feature_of_interest}.png", do_render=True) # save the image to the directory
+        # vis.destroy_window()
+        
+        # open3d.visualization.draw_geometries(items) # remains blocked here until visualization window is closed
+        # open3d.visualization.capture_screen_image(directory_path + f"/feature{feature_of_interest}.png", do_render=True) # save the image to the directory
 
 
 import numpy as np
