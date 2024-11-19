@@ -92,6 +92,8 @@ class DeformerNetSingle(nn.Module):
     def forward(self, xyz, xyz_goal):
         # Set Abstraction layers
         B, C, N = xyz.shape
+
+        # Encode current point cloud
         if self.normal_channel:
             l0_points = xyz
             l0_xyz = xyz[:, :3, :]
@@ -105,6 +107,7 @@ class DeformerNetSingle(nn.Module):
         l3_xyz, l3_points = self.sa3(l2_xyz, l2_points)
         x = l3_points.view(B, 256) # reshape to (B, 256)
 
+        # Encode goal point cloud
         if self.normal_channel:
             l0_points = xyz_goal
             l0_xyz = xyz_goal[:, :3, :]
@@ -118,6 +121,7 @@ class DeformerNetSingle(nn.Module):
 
         x = torch.cat((x, g), dim=-1) # x.shape = (B, 512)
 
+        # Fully connected layers for reasoning over features
         x = F.relu(self.bn1(self.fc1(x)))
         x = F.relu(self.bn3(self.fc3(x)))
         x = F.relu(self.bn4(self.fc4(x)))
