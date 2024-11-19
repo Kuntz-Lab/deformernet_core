@@ -20,6 +20,8 @@ src_path = os.path.join(os.path.dirname(__file__), '..')
 print(f"Adding {src_path} to sys.path")
 sys.path.append(src_path)
 from utils.point_cloud_utils import tensorize_pointcloud, pick_point, visualize_pointclouds
+# from utils.explain import visualize_weights, architecture_graph
+# from torchviz import make_dot
 
 def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: np.ndarray, manipulation_point: np.ndarray, visualize: bool = False) -> np.ndarray:
     """
@@ -51,6 +53,8 @@ def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: 
     model.to(device) # TODO: make this a parameter?
     model.eval()
 
+    # visualize_weights(model)
+    
     # Filter XYZ limits
     # TODO:
 
@@ -69,6 +73,9 @@ def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: 
 
         # Run the model
         pos, rot_mat = model(current_pointcloud_tensor.unsqueeze(0), goal_pointcloud_tensor.unsqueeze(0)) # the magic line
+
+        # make_dot((pos, rot_mat), params=dict(model.named_parameters())).render("DeformerNetSingle", format="png")
+
         pos, rot_mat = pos.detach().cpu().numpy(), rot_mat.detach().cpu().numpy() # pos.shape = (1, 3)
 
         # Transform and scale the translation output
