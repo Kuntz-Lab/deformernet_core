@@ -93,27 +93,27 @@ class DeformerNetSingle(nn.Module):
         # Set Abstraction layers
         B, C, N = xyz.shape
 
-        # Encode current point cloud
         if self.normal_channel:
             l0_points = xyz
-            l0_xyz = xyz[:, :3, :]
+            l0_xyz = xyz[:, :3, :] # remove manipulation point channel
         else:
             l0_points = xyz
-            l0_xyz = xyz[:, :3, :]
+            l0_xyz = xyz[:, :3, :] # remove manipulation point channel
 
+        # Encode current point cloud
         l1_xyz, l1_points = self.sa1(l0_xyz, l0_points)
-        # print(l1_points.shape)
         l2_xyz, l2_points = self.sa2(l1_xyz, l1_points)
         l3_xyz, l3_points = self.sa3(l2_xyz, l2_points)
         x = l3_points.view(B, 256) # reshape to (B, 256)
 
-        # Encode goal point cloud
         if self.normal_channel:
             l0_points = xyz_goal
-            l0_xyz = xyz_goal[:, :3, :]
+            l0_xyz = xyz_goal[:, :3, :] # remove manipulation point channel
         else:
             l0_points = xyz_goal
             l0_xyz = xyz_goal
+
+        # Encode goal point cloud
         l1_xyz, l1_points = self.sa1_g(l0_xyz, l0_points)
         l2_xyz, l2_points = self.sa2_g(l1_xyz, l1_points)
         l3_xyz, l3_points = self.sa3_g(l2_xyz, l2_points)
