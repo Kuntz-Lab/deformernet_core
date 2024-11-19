@@ -12,31 +12,31 @@ def visualize_pointclouds_simple_from_tensor(point_cloud: Tensor, point_cloud_fe
     
     """
     items = []
-
-    feature_of_interest = 0
-    point_cloud_features = point_cloud_features[0].cpu().numpy() # remove the batch dimension and convert to numpy
-    feature = point_cloud_features[feature_of_interest]
-
-    feature_max = feature.max()
-    feature_min = feature.min()
-    feature_mean = feature.mean()
-    print(f"feature max: {feature_max}, feature min: {feature_min}, feature mean: {feature_mean}")
-    feature = (feature - feature_min) / (feature_max - feature_min) # normalize the feature. Slide to zero and divide by range to get values between 0 and 1
-
-
-
     pc1_array = point_cloud[0].cpu().numpy()
     pc1_array = np.swapaxes(pc1_array, 0, 1)
 
-    # pc1 = pcd_ize(pc1_array, color=[0, 0, 0])
-    pc1 = array_to_pointcloud(pc1_array, color=[0, 0, 0], values=feature, vis=False)
-    items.append(pc1)
-
-    if plot_origin:
-        coor = open3d.geometry.TriangleMesh.create_coordinate_frame(size=0.05) 
-        items.append(coor)
+    point_cloud_features = point_cloud_features[0].cpu().numpy() # remove the batch dimension and convert to numpy
     
-    open3d.visualization.draw_geometries(items) # remains blocked here until visualization window is closed
+    feature_of_interest = 0
+    features_to_visualize = 20
+    
+    for feature_of_interest in range(features_to_visualize):
+        feature = point_cloud_features[feature_of_interest]
+
+        feature_max = feature.max()
+        feature_min = feature.min()
+        feature_mean = feature.mean()
+        print(f"feature max: {feature_max}, feature min: {feature_min}, feature mean: {feature_mean}")
+        feature = (feature - feature_min) / (feature_max - feature_min) # normalize the feature. Slide to zero and divide by range to get values between 0 and 1
+
+        pc1 = array_to_pointcloud(pc1_array, values=feature, vis=False)
+        items.append(pc1)
+
+        if plot_origin:
+            coor = open3d.geometry.TriangleMesh.create_coordinate_frame(size=0.05) 
+            items.append(coor)
+        
+        open3d.visualization.draw_geometries(items) # remains blocked here until visualization window is closed
 
 
 import numpy as np
