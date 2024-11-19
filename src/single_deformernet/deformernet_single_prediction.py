@@ -20,8 +20,7 @@ src_path = os.path.join(os.path.dirname(__file__), '..')
 print(f"Adding {src_path} to sys.path")
 sys.path.append(src_path)
 from utils.point_cloud_utils import tensorize_pointcloud, pick_point, visualize_pointclouds
-# from utils.explain import visualize_weights, architecture_graph
-# from torchviz import make_dot
+
 
 def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: np.ndarray, manipulation_point: np.ndarray, visualize: bool = False) -> np.ndarray:
     """
