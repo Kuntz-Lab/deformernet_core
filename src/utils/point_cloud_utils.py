@@ -170,14 +170,14 @@ def tensorize_pointcloud(
     manipulation_points: Optional[List[np.ndarray]] = None,
     ) -> torch.Tensor:
     """
-    Convert a numpy pointcloud to a PyTorch tensor. Optionally, add channels for manipulation points.
+    Convert a numpy point cloud to a PyTorch tensor. Optionally, add channels for manipulation points.
 
     Parameters:
-        pointcloud (np.ndarray): The pointcloud. Shape (number of points, 3)
+        pointcloud (np.ndarray): The point cloud. Shape (number of points, 3)
         manipulation_points (List[np.ndarray]): The manipulation points. Each manipulation point is a numpy array in the form [x, y, z].
 
     Returns:
-        pointcloud (torch.Tensor): The pointcloud tensor.
+        pointcloud (torch.Tensor): The point cloud tensor.
     """
     
     assert pointcloud.shape[1] == 3, "Input point cloud should have shape (number of points, 3)"
@@ -204,14 +204,14 @@ def tensorize_pointcloud(
 
 def get_manipulation_point_channels(pointcloud: np.ndarray, manipulation_points: np.ndarray) -> List[np.ndarray]:
     """"
-    Modifies pointcloud to include a channel for each manipulation point. The channel is 1 near the manipulation point and 0 elsewhere.
+    Modifies point cloud to include a channel for each manipulation point. The channel is 1 near the manipulation point and 0 elsewhere.
 
     Parameters:
-        pointcloud (np.ndarray): The pointcloud.
+        pointcloud (np.ndarray): The point cloud.
         manipulation_points (np.ndarray): The manipulation points.
 
     Returns:
-        modified_pc (np.ndarray): The modified pointcloud with the manipulation point channel(s).
+        modified_pc (np.ndarray): The modified point cloud with the manipulation point channel(s).
     """
     
     assert type(manipulation_points) == list, "manipulation_points should be a list of numpy arrays"          
@@ -240,7 +240,7 @@ def down_sampling(pc, num_pts=1024, return_indices=False):
         pc: point cloud data, [B, N, D] where B = num batches, N = num points, D = feature size (typically D=3)
         num_pts: number of samples
     Return:
-        centroids: sampled pointcloud index, [num_pts, D]
+        centroids: sampled point cloud index, [num_pts, D]
         pc: down_sampled point cloud, [num_pts, D]
     """
 

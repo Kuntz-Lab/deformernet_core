@@ -71,10 +71,10 @@ def index_points(points, idx):
 def farthest_point_sample(xyz, npoint):
     """
     Input:
-        xyz: pointcloud data, [B, N, 3]
+        xyz: point cloud data, [B, N, 3]
         npoint: number of samples
     Return:
-        centroids: sampled pointcloud index, [B, npoint]
+        centroids: sampled point cloud index, [B, npoint]
     """
     device = xyz.device
     B, N, C = xyz.shape
