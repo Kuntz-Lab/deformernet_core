@@ -9,7 +9,7 @@ print(f"Adding {src_path} to sys.path")
 sys.path.append(src_path)
 
 import utils.tools as tools
-from pointconv_util_groupnorm import PointConvDensitySetAbstraction
+from utils.pointconv_util_groupnorm import PointConvDensitySetAbstraction
 
 
 class DeformerNetBimanual(nn.Module):

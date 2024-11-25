@@ -1,7 +1,6 @@
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
-from pointconv_util_groupnorm import PointConvDensitySetAbstraction
 
 import os
 import sys
@@ -11,6 +10,7 @@ print(f"Adding {src_path} to sys.path")
 sys.path.append(src_path)
 
 import utils.tools as tools
+from utils.pointconv_util_groupnorm import PointConvDensitySetAbstraction
 from utils.explain import visualize_pointclouds_simple_from_tensor
 
 class DeformerNetSingle(nn.Module):
