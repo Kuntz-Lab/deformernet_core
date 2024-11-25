@@ -1,11 +1,14 @@
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
-import tools
 import sys
+import os
 
-sys.path.append("../")
+src_path = os.path.join(os.path.dirname(__file__), '..')
+print(f"Adding {src_path} to sys.path")
+sys.path.append(src_path)
 
+import utils.tools as tools
 from pointconv_util_groupnorm import PointConvDensitySetAbstraction
 
 
