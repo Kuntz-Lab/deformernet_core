@@ -2,7 +2,6 @@ import torch.nn as nn
 import torch
 import torch.nn.functional as F
 from pointconv_util_groupnorm import PointConvDensitySetAbstraction
-import tools
 
 import os
 import sys
@@ -11,6 +10,7 @@ src_path = os.path.join(os.path.dirname(__file__), '..')
 print(f"Adding {src_path} to sys.path")
 sys.path.append(src_path)
 
+import utils.tools as tools
 from utils.explain import visualize_pointclouds_simple_from_tensor
 
 class DeformerNetSingle(nn.Module):
@@ -111,7 +111,7 @@ class DeformerNetSingle(nn.Module):
         # Encode current point cloud
         l1_xyz, l1_points = self.sa1(l0_xyz, l0_points)
 
-        visualize_pointclouds_simple_from_tensor(l1_xyz, l1_points, plot_origin=True)
+        # visualize_pointclouds_simple_from_tensor(l1_xyz, l1_points, plot_origin=True)
 
         l2_xyz, l2_points = self.sa2(l1_xyz, l1_points)
         l3_xyz, l3_points = self.sa3(l2_xyz, l2_points)

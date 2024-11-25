@@ -49,16 +49,8 @@ def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: 
         print("Using CPU")
     
     model.load_state_dict(torch.load(weight_path))  
-    model.to(device) # TODO: make this a parameter?
+    model.to(device)
     model.eval()
-
-    # visualize_weights(model)
-    
-    # Filter XYZ limits
-    # TODO:
-
-    # Down sample to 1024 points
-    # TODO:
 
     with torch.no_grad():
 
@@ -72,8 +64,6 @@ def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: 
 
         # Run the model
         pos, rot_mat = model(current_pointcloud_tensor.unsqueeze(0), goal_pointcloud_tensor.unsqueeze(0)) # the magic line
-
-        # make_dot((pos, rot_mat), params=dict(model.named_parameters())).render("DeformerNetSingle", format="png")
 
         pos, rot_mat = pos.detach().cpu().numpy(), rot_mat.detach().cpu().numpy() # pos.shape = (1, 3)
 
