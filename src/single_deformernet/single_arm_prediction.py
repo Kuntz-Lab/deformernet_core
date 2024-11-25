@@ -24,16 +24,17 @@ from utils.point_cloud_utils import tensorize_pointcloud, pick_point, visualize_
 
 def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: np.ndarray, manipulation_point: np.ndarray, visualize: bool = False) -> np.ndarray:
     """
-    Run a DeformerNet prediction to determine the robot action which will transform the current pointcloud to the goal pointcloud.
+    Run a DeformerNet prediction to determine the robot action which will transform the current point cloud to the goal point cloud.
 
     Parameters:
-        current_pointcloud (np.ndarray): The current pointcloud.
-        goal_pointcloud (np.ndarray): The goal pointcloud.
+        current_pointcloud (np.ndarray): The current point cloud.
+        goal_pointcloud (np.ndarray): The goal point cloud.
         manipulation_point (np.ndarray): The manipulation point.
         visualize (bool): Whether to visualize the action. Default is False.
 
     Returns:
         action (np.ndarray): The predicted robot action in the form of a vector of length 6. The action is in the same frame as the input pointclouds.
+                                Format: [translation, rotation]
     """
       
     # Load network architecture and weights
@@ -54,7 +55,7 @@ def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: 
 
     with torch.no_grad():
 
-        # Convert the pointclouds to tensors
+        # Convert the point clouds to tensors
         goal_pointcloud_tensor = tensorize_pointcloud(goal_pointcloud).to(device)
 
         if (manipulation_point is not None):                                 
@@ -85,7 +86,7 @@ def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: 
         visualize_pointclouds(current_pointcloud, goal_pointcloud, only_pointclouds=False, manipulation_point = manipulation_point, action_translation=desired_translation_action, action_rotation=desired_eulers)
     
   
-    return action   # 6D for single-arm, 12D for bimanual (first 6 for left arm, last 6 for right arm)
+    return action
 
 if __name__ == '__main__':
     goal_pointcloud_path = "data/pointclouds/filtered_goal_singlearm_goal1.pickle"
