@@ -20,7 +20,7 @@ src_path = os.path.join(os.path.dirname(__file__), '..')
 print(f"Adding {src_path} to sys.path")
 sys.path.append(src_path)
 from utils.point_cloud_utils import tensorize_pointcloud, pick_point, visualize_pointclouds
-
+from utils.explain import compute_action_gradients, visualize_pointclouds_simple_from_tensor
 
 def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: np.ndarray, manipulation_point: np.ndarray, visualize: bool = False) -> np.ndarray:
     """
@@ -66,6 +66,10 @@ def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: 
         # Run the model
         pos, rot_mat = model(current_pointcloud_tensor.unsqueeze(0), goal_pointcloud_tensor.unsqueeze(0)) # the magic line
 
+        # # Gradient-based attribution
+        # ideal_goal_manipulation_point = np.array([0.01088822, -0.03660944, 0.12149959])
+        # compute_action_gradients(model, current_pointcloud_tensor, goal_pointcloud_tensor, manipulation_point, ideal_goal_manipulation_point)
+        
         pos, rot_mat = pos.detach().cpu().numpy(), rot_mat.detach().cpu().numpy() # pos.shape = (1, 3)
 
         # Transform and scale the translation output
