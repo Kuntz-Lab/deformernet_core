@@ -33,14 +33,6 @@ def compute_action_gradients(model, current_pointcloud_tensor, goal_pointcloud_t
     pos, rot_mat = model(current_pointcloud_tensor.unsqueeze(0), 
                         goal_pointcloud_tensor.unsqueeze(0))
     
-    # ideal_goal_manipulation_point = torch.tensor([0.01088822, -0.03660944, 0.12149959], 
-    #                                        device=pos.device,
-    #                                        dtype=pos.dtype)
-    # manipulation_point = torch.tensor(manipulation_point, 
-    #                                 device=pos.device,
-    #                                 dtype=pos.dtype)
-    # ideal_action = ideal_goal_manipulation_point - manipulation_point
-    
     # Convert ideal action to tensor
     ideal_action = torch.tensor(ideal_goal_manipulation_point - manipulation_point,
                                 device=pos.device,
@@ -74,15 +66,26 @@ def compute_action_gradients(model, current_pointcloud_tensor, goal_pointcloud_t
 
     current_pointcloud_grad = current_pointcloud_grad.squeeze().detach().cpu().numpy()[0:3, :]
     current_pointcloud_grad = np.swapaxes(current_pointcloud_grad, 0, 1)
-    current_pointcloud_grad = current_pointcloud_grad[:, 0] # take the gradients for only one cartesian direction for now
-    
-    goal_pointcloud_grad = goal_pointcloud_grad.squeeze().detach().cpu().numpy()[0:3, :]
-    goal_pointcloud_grad = np.swapaxes(goal_pointcloud_grad, 0, 1)
-    goal_pointcloud_grad = goal_pointcloud_grad[:, 0] # take the gradients for only one cartesian direction for now
+    # current_pointcloud_grad = current_pointcloud_grad[:, 0] # take the gradients for only one cartesian direction for now
+    current_pointcloud_grad = np.linalg.norm(current_pointcloud_grad, axis=1)
+    current_pointcloud_mean = current_pointcloud_grad.mean()
+    current_pointcloud_std = current_pointcloud_grad.std()
+    cutoff = current_pointcloud_mean + 0.3*current_pointcloud_std
+    print(f"mean: {current_pointcloud_mean}, std: {current_pointcloud_std}, cutoff: {cutoff}")
+    current_pointcloud_grad[current_pointcloud_grad > cutoff] = cutoff # clip the gradients to remove outliers
 
     visualize_pointcloud_with_weights(current_pointcloud_numpy, current_pointcloud_grad, plot_origin=True)
 
-    # visualize_pointcloud_with_weights(goal_pointcloud_numpy, goal_pointcloud_grad, plot_origin=True)
+    goal_pointcloud_grad = goal_pointcloud_grad.squeeze().detach().cpu().numpy()[0:3, :]
+    goal_pointcloud_grad = np.swapaxes(goal_pointcloud_grad, 0, 1)
+    # goal_pointcloud_grad = goal_pointcloud_grad[:, 0] # take the gradients for only one cartesian direction for now
+    goal_pointcloud_grad = np.linalg.norm(goal_pointcloud_grad, axis=1)
+    goal_pointcloud_mean = goal_pointcloud_grad.mean()
+    goal_pointcloud_std = goal_pointcloud_grad.std()
+    cutoff = goal_pointcloud_mean + 0.3*goal_pointcloud_std
+    goal_pointcloud_grad[goal_pointcloud_grad > cutoff] = cutoff # clip the gradients to remove outliers
+
+    visualize_pointcloud_with_weights(goal_pointcloud_numpy, goal_pointcloud_grad, plot_origin=True)
    
     return current_pointcloud_grad, goal_pointcloud_grad
 
