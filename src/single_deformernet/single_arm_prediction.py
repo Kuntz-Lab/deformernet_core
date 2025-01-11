@@ -66,10 +66,6 @@ def run_deformernet_prediction(current_pointcloud: np.ndarray, goal_pointcloud: 
         # Run the model
         pos, rot_mat = model(current_pointcloud_tensor.unsqueeze(0), goal_pointcloud_tensor.unsqueeze(0)) # the magic line
 
-        # # Gradient-based attribution
-        # ideal_goal_manipulation_point = np.array([0.01088822, -0.03660944, 0.12149959])
-        # compute_action_gradients(model, current_pointcloud_tensor, goal_pointcloud_tensor, manipulation_point, ideal_goal_manipulation_point)
-        
         pos, rot_mat = pos.detach().cpu().numpy(), rot_mat.detach().cpu().numpy() # pos.shape = (1, 3)
 
         # Transform and scale the translation output
